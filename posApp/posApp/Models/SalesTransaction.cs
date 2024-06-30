@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using posApp;
-
-namespace posApp
+namespace posApp.Models
 {
     public static class SalesTransaction
     {

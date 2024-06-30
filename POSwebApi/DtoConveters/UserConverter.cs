@@ -1,5 +1,6 @@
-﻿using posApp;
+﻿using posApp.Models;
 using POSwebApi.Dtos;
+
 
 namespace POSwebApi.DtoConveters
 {

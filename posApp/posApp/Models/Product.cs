@@ -1,7 +1,12 @@
-﻿namespace POSwebApi.Dtos
+﻿
+using System.ComponentModel.DataAnnotations;
+
+namespace posApp.Models
 {
-    public class ProductDTO
+    public class Product
     {
+        [Key]
+        public int id { get; set; }
         public string name { get; set; } = string.Empty;
         public string type { get; set; } = string.Empty;
         public string category { get; set; } = string.Empty;

@@ -1,15 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.Xml.Linq;
+﻿using Newtonsoft.Json;
+using posApp.DB;
+using posApp.Models;
+using posApp.Response;
 
 
-namespace posApp
+namespace posApp.Services
 {
-    public  class ProductManager
+    public class ProductService
     {
         private readonly DataContext _dtContext;
 
-        public ProductManager(DataContext context)
+        public ProductService(DataContext context)
         {
             _dtContext = context;
         }
@@ -19,7 +20,7 @@ namespace posApp
             return _dtContext.products.ToList();
         }
 
-        public  Product? FindProduct(string name)
+        public Product? FindProduct(string name)
         {
             return _dtContext.products.FirstOrDefault(p => p.name == name);
         }
@@ -58,7 +59,7 @@ namespace posApp
             Product? existingProduct = FindProduct(product.name);
             if (existingProduct != null)
             {
-                _dtContext.products.Remove(existingProduct);    
+                _dtContext.products.Remove(existingProduct);
                 _dtContext.SaveChanges();
                 Console.WriteLine("Product removed successfully.");
             }

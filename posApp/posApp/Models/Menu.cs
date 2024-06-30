@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace posApp
+namespace posApp.Models
 {
     public static class Menu
     {

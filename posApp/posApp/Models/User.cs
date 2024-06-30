@@ -1,7 +1,7 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 
-namespace posApp
+namespace posApp.Models
 {
     public class User
     {

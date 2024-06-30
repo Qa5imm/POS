@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using posApp;
+using posApp.Models;
+using posApp.Services;
+using posApp.Response;
 using POSwebApi.Dtos;
 using POSwebApi.DtoConveters;
 
@@ -9,25 +11,25 @@ namespace POSwebApi.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ProductManager _productManager;
+        private readonly ProductService _productService;
 
-        public ProductController(ProductManager productManager)
+        public ProductController(ProductService productManager)
         {
-            _productManager = productManager;
+            _productService = productManager;
         }
 
 
         [HttpGet("all")]
         public ActionResult<IEnumerable<ProductDTO>> GetProducts()
         {
-            List<Product> products = _productManager.GetProducts();
+            List<Product> products = _productService.GetProducts();
             return Ok(ProductConverter.ToDTOList(products));
         }
 
         [HttpGet("{name}")]
         public ActionResult<ProductDTO> GetProduct(string name)
         {
-            Product? product = _productManager.FindProduct(name);
+            Product? product = _productService.FindProduct(name);
 
             if (product == null)
             {
@@ -42,13 +44,13 @@ namespace POSwebApi.Controllers
         [HttpPost]
         public ActionResult<ProductDTO> AddProduct(ProductDTO productDTO)
         {
-            var existingProduct = _productManager.FindProduct(productDTO.name);
+            var existingProduct = _productService.FindProduct(productDTO.name);
             if (existingProduct != null)
             {
                 return Conflict(new { message = "Product already exist" });
             }
 
-            _productManager.AddProduct(ProductConverter.ToProduct(productDTO));
+            _productService.AddProduct(ProductConverter.ToProduct(productDTO));
             return CreatedAtAction(nameof(GetProduct), new { name = productDTO.name }, productDTO);
 
         }
@@ -57,12 +59,12 @@ namespace POSwebApi.Controllers
         [HttpPut("update")]
         public ActionResult<ProductDTO> UpdateProduct(ProductDTO productDTO)
         {
-            var existingProduct = _productManager.FindProduct(productDTO.name);
+            var existingProduct = _productService.FindProduct(productDTO.name);
             if (existingProduct == null)
             {
                 return NotFound(new { message = "Product not found" });
             }
-            Product? updatedProduct = _productManager.UpdateProduct(productDTO.name, productDTO.price, productDTO.quantity, productDTO.type, productDTO.category);
+            Product? updatedProduct = _productService.UpdateProduct(productDTO.name, productDTO.price, productDTO.quantity, productDTO.type, productDTO.category);
             return Ok(ProductConverter.ToDTO(updatedProduct));
         }
 
@@ -71,7 +73,7 @@ namespace POSwebApi.Controllers
         public ActionResult<ProductDTO> UpdatepProductQuantity(string name, int quantity)
         {
 
-            Product? existingProduct = _productManager.UpdateProductQuantity(name, quantity);
+            Product? existingProduct = _productService.UpdateProductQuantity(name, quantity);
             if (existingProduct == null)
             {
                 return NotFound(new { message = "Product not found" });
@@ -88,7 +90,7 @@ namespace POSwebApi.Controllers
         [HttpPatch("sellProducts")]
         public ActionResult SellProducts(List<ProductDTO> productDTOs)
         {
-            SellProductsResult result = _productManager.SellProducts(ProductConverter.ToProductList(productDTOs));
+            SellProductsResult result = _productService.SellProducts(ProductConverter.ToProductList(productDTOs));
 
             if (result.Success)
             {
@@ -101,12 +103,12 @@ namespace POSwebApi.Controllers
         [HttpDelete("{name}")]
         public ActionResult RemoveRroduct(string name)
         {
-            Product? existingProduct = _productManager.FindProduct(name);
+            Product? existingProduct = _productService.FindProduct(name);
             if (existingProduct == null)
             {
                 return NotFound(new { message = "Product not found" });
             }
-            _productManager.RemoveProduct(existingProduct);
+            _productService.RemoveProduct(existingProduct);
             return Ok(new { message = "Product deleted successfully" });
         }
 

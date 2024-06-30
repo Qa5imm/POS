@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Builder;
-using posApp;
+using posApp.DB;
+using posApp.Services;
 
 
 
@@ -16,8 +15,8 @@ builder.Services.AddDbContext<DataContext>(opt =>
     opt.UseInMemoryDatabase("posApp"));
 
 
-builder.Services.AddScoped<ProductManager>();
-builder.Services.AddScoped<UserManager>();
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

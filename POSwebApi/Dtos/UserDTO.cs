@@ -1,5 +1,4 @@
-﻿
-namespace POSwebApi.Dtos
+﻿namespace POSwebApi.Dtos
 {
     public class UserDTO
     {

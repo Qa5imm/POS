@@ -1,10 +1,13 @@
-﻿namespace posApp
+﻿using posApp.DB;
+using posApp.Models;
+
+namespace posApp.Services
 {
-    public class UserManager
+    public class UserService
     {
 
         private readonly DataContext _dtContext;
-        public UserManager(DataContext dtcontext)
+        public UserService(DataContext dtcontext)
         {
             _dtContext = dtcontext;
         }
@@ -41,7 +44,7 @@
             User? user = FindUser(email);
             if (user != null)
             {
-                _dtContext.users.Remove(user); 
+                _dtContext.users.Remove(user);
                 _dtContext.SaveChanges();
                 Console.WriteLine("User removed successfully.");
             }

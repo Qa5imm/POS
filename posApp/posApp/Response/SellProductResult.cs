@@ -1,6 +1,8 @@
-﻿namespace posApp
+﻿using posApp.Models;
+
+namespace posApp.Response
 {
-     public class SellProductsResult
+    public class SellProductsResult
     {
         public List<Product> Products { get; set; }
         public string ErrorMessage { get; set; }
