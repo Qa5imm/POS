@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Mvc;
 using posApp;
+using POSwebApi.Dtos;
+using POSwebApi.DtoConveters;
 
 namespace POSwebApi.Controllers
 {
@@ -9,10 +9,8 @@ namespace POSwebApi.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-
-
         private readonly ProductManager _productManager;
-        
+
         public ProductController(ProductManager productManager)
         {
             _productManager = productManager;
@@ -20,54 +18,57 @@ namespace POSwebApi.Controllers
 
 
         [HttpGet("all")]
-        public ActionResult<IEnumerable<Product>> GetProducts()
+        public ActionResult<IEnumerable<ProductDTO>> GetProducts()
         {
             List<Product> products = _productManager.GetProducts();
-            return Ok(products);
+            return Ok(ProductConverter.ToDTOList(products));
         }
 
         [HttpGet("{name}")]
-        public ActionResult<Product> GetProduct(string name)
+        public ActionResult<ProductDTO> GetProduct(string name)
         {
             Product? product = _productManager.FindProduct(name);
+
             if (product == null)
             {
                 return NotFound(new { message = "Product not found" });
             }
-            return Ok(product);
+
+            
+            return Ok(ProductConverter.ToDTO(product));
 
         }
 
         [HttpPost]
-        public ActionResult<Product> AddProduct(Product product)
+        public ActionResult<ProductDTO> AddProduct(ProductDTO productDTO)
         {
-            var productExist = _productManager.FindProduct(product.name);
-            if (productExist != null)
+            var existingProduct = _productManager.FindProduct(productDTO.name);
+            if (existingProduct != null)
             {
                 return Conflict(new { message = "Product already exist" });
             }
 
-            _productManager.AddProduct(product);
-            return CreatedAtAction(nameof(GetProduct), new { name = product.name }, product);
+            _productManager.AddProduct(ProductConverter.ToProduct(productDTO));
+            return CreatedAtAction(nameof(GetProduct), new { name = productDTO.name }, productDTO);
 
         }
 
 
         [HttpPut("update")]
-        public ActionResult<Product> UpdateProduct(Product product)
+        public ActionResult<ProductDTO> UpdateProduct(ProductDTO productDTO)
         {
-            var existingProduct = _productManager.FindProduct(product.name);
+            var existingProduct = _productManager.FindProduct(productDTO.name);
             if (existingProduct == null)
             {
                 return NotFound(new { message = "Product not found" });
             }
-            Product? updatedProduct= _productManager.UpdateProduct(product.name, product.price, product.quantity, product.type, product.category);
-            return Ok(updatedProduct);
+            Product? updatedProduct = _productManager.UpdateProduct(productDTO.name, productDTO.price, productDTO.quantity, productDTO.type, productDTO.category);
+            return Ok(ProductConverter.ToDTO(updatedProduct));
         }
 
         [HttpPatch("updateQuantity")]
 
-        public ActionResult<Product> UpdatepProductQuantity(string name, int quantity)
+        public ActionResult<ProductDTO> UpdatepProductQuantity(string name, int quantity)
         {
 
             Product? existingProduct = _productManager.UpdateProductQuantity(name, quantity);
@@ -81,14 +82,14 @@ namespace POSwebApi.Controllers
                 return BadRequest(new { message = "Invalid quantity" });
             }
 
-            return Ok(existingProduct);
+            return Ok(ProductConverter.ToDTO(existingProduct));
         }
 
         [HttpPatch("sellProducts")]
-        public ActionResult SellProducts(List<Product> products)
+        public ActionResult SellProducts(List<ProductDTO> productDTOs)
         {
-            SellProductsResult result = _productManager.SellProducts(products);
-           
+            SellProductsResult result = _productManager.SellProducts(ProductConverter.ToProductList(productDTOs));
+
             if (result.Success)
             {
                 return Ok(new Receipt(result.Products, "User Reciept"));

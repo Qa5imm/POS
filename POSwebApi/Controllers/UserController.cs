@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using posApp;
+using POSwebApi.Dtos;
+using POSwebApi.DtoConveters;
+
 
 
 namespace POSwebApi.Controllers
@@ -12,25 +15,25 @@ namespace POSwebApi.Controllers
         public UserController(UserManager userManager)
         {
             _userManager = userManager;
-        }   
+        }
 
         [HttpGet("all")]
-        public ActionResult<IEnumerable<User>> GetUsers()
+        public ActionResult<IEnumerable<UserDTO>> GetUsers()
         {
             List<User> allUsers = _userManager.GetUsers();
-            return Ok(allUsers);
+            return Ok(UserConverter.ToDTOList(allUsers));
 
         }
 
         [HttpGet("{email}")]
-        public ActionResult<User> GetUser(string email)
+        public ActionResult<UserDTO> GetUser(string email)
         {
             User? user = _userManager.FindUser(email);
             if (user == null)
             {
                 return NotFound(new { messgae = "User not found" });
             }
-            return Ok(user);
+            return Ok(UserConverter.ToDTO(user));
         }
 
         [HttpGet("authenticate/{email}")]
@@ -45,7 +48,7 @@ namespace POSwebApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult<IEnumerable<User>> CreateUser(User user)
+        public ActionResult<IEnumerable<UserDTO>> CreateUser(User user)
         {
             User? existingUser = _userManager.FindUser(user.email);
 
@@ -55,11 +58,12 @@ namespace POSwebApi.Controllers
 
             }
             _userManager.AddUser(user);
-            return CreatedAtAction(nameof(GetUser), new { email = user.email }, user);
+            UserDTO userDTO = UserConverter.ToDTO(user);
+            return CreatedAtAction(nameof(GetUser), new { email = user.email }, userDTO);
         }
 
         [HttpPatch("updateUserRole")]
-        public ActionResult<User> UpdateUserRole(string email, string role)
+        public ActionResult<UserDTO> UpdateUserRole(string email, string role)
         {
             User? existingUser = _userManager.FindUser(email);
             if (existingUser == null)
@@ -68,7 +72,7 @@ namespace POSwebApi.Controllers
             }
 
             User? updatedUser = _userManager.UpdateUserRole(email, role);
-            return Ok(updatedUser);
+            return Ok(UserConverter.ToDTO(updatedUser));
         }
 
         [HttpDelete("{email}")]
