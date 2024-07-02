@@ -2,6 +2,7 @@
 {
     public class ProductDTO
     {
+        public int id { get; set; }
         public string name { get; set; } = string.Empty;
         public string type { get; set; } = string.Empty;
         public string category { get; set; } = string.Empty;

@@ -10,6 +10,7 @@ namespace POSwebApi.DtoConveters
         {
             return new UserDTO
             {
+                id = user.id,
                 name = user.name,
                 email = user.email,
                 role = user.role
@@ -25,6 +26,7 @@ namespace POSwebApi.DtoConveters
         {
             return new User
             {
+                id= userDTO.id, 
                 name = userDTO.name,
                 email = userDTO.email,
                 role = userDTO.role

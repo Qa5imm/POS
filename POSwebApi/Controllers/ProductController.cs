@@ -1,116 +1,82 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using posApp.Models;
-using posApp.Services;
-using posApp.Response;
-using POSwebApi.Dtos;
+using posApp.Service;
 using POSwebApi.DtoConveters;
+using POSwebApi.Dtos;
 
-namespace POSwebApi.Controllers
+namespace posApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ProductService _productService;
 
-        public ProductController(ProductService productManager)
+        private readonly IService<Product> _productService;
+
+        public ProductController(IService<Product> service)
         {
-            _productService = productManager;
+            _productService = service;
         }
 
-
-        [HttpGet("all")]
-        public ActionResult<IEnumerable<ProductDTO>> GetProducts()
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            List<Product> products = _productService.GetProducts();
-            return Ok(ProductConverter.ToDTOList(products));
+            var products = await _productService.GetAllAsync();
+            List<ProductDTO> productsDTO = ProductConverter.ToDTOList(products);
+            return Ok(productsDTO);
         }
 
-        [HttpGet("{name}")]
-        public ActionResult<ProductDTO> GetProduct(string name)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            Product? product = _productService.FindProduct(name);
-
+            var product = await _productService.GetByIdAsync(id);
             if (product == null)
             {
-                return NotFound(new { message = "Product not found" });
+                return NotFound();
             }
-
-            
-            return Ok(ProductConverter.ToDTO(product));
-
+            ProductDTO productDTO = ProductConverter.ToDTO(product);
+            return Ok(productDTO);
         }
 
         [HttpPost]
-        public ActionResult<ProductDTO> AddProduct(ProductDTO productDTO)
+        public async Task<IActionResult> Add([FromBody] Product product)
         {
-            var existingProduct = _productService.FindProduct(productDTO.name);
-            if (existingProduct != null)
-            {
-                return Conflict(new { message = "Product already exist" });
-            }
-
-            _productService.AddProduct(ProductConverter.ToProduct(productDTO));
-            return CreatedAtAction(nameof(GetProduct), new { name = productDTO.name }, productDTO);
-
+            await _productService.AddAsync(product);
+            ProductDTO productDTO = ProductConverter.ToDTO(product);
+            return CreatedAtAction(nameof(GetById), new { id = product.id }, productDTO);
         }
 
-
-        [HttpPut("update")]
-        public ActionResult<ProductDTO> UpdateProduct(ProductDTO productDTO)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Product product)
         {
-            var existingProduct = _productService.FindProduct(productDTO.name);
+            if (id != product.id)
+            {
+                return BadRequest();
+            }
+
+            var existingProduct = await _productService.GetByIdAsync(id);
             if (existingProduct == null)
             {
-                return NotFound(new { message = "Product not found" });
+                return NotFound();
             }
-            Product? updatedProduct = _productService.UpdateProduct(productDTO.name, productDTO.price, productDTO.quantity, productDTO.type, productDTO.category);
-            return Ok(ProductConverter.ToDTO(updatedProduct));
+
+            // Update the product
+            await _productService.UpdateAsync(product);
+            ProductDTO productDTO = ProductConverter.ToDTO(product);
+            return Ok(productDTO);
         }
 
-        [HttpPatch("updateQuantity")]
-
-        public ActionResult<ProductDTO> UpdatepProductQuantity(string name, int quantity)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-
-            Product? existingProduct = _productService.UpdateProductQuantity(name, quantity);
-            if (existingProduct == null)
+            var product = await _productService.GetByIdAsync(id);
+            if (product == null)
             {
-                return NotFound(new { message = "Product not found" });
+                return NotFound();
             }
 
-            if (existingProduct.quantity < 0)
-            {
-                return BadRequest(new { message = "Invalid quantity" });
-            }
-
-            return Ok(ProductConverter.ToDTO(existingProduct));
+            await _productService.DeleteAsync(id);
+            return Ok();
         }
-
-        [HttpPatch("sellProducts")]
-        public ActionResult SellProducts(List<ProductDTO> productDTOs)
-        {
-            SellProductsResult result = _productService.SellProducts(ProductConverter.ToProductList(productDTOs));
-
-            if (result.Success)
-            {
-                return Ok(new Receipt(result.Products, "User Reciept"));
-            }
-            return BadRequest(new { message = result.ErrorMessage });
-
-        }
-
-        [HttpDelete("{name}")]
-        public ActionResult RemoveRroduct(string name)
-        {
-            Product? existingProduct = _productService.FindProduct(name);
-            if (existingProduct == null)
-            {
-                return NotFound(new { message = "Product not found" });
-            }
-            _productService.RemoveProduct(existingProduct);
-            return Ok(new { message = "Product deleted successfully" });
-        }
-
     }
 }
