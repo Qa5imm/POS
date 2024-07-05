@@ -42,17 +42,31 @@ namespace POSwebApi.Controllers
         public async Task<IActionResult> Add([FromBody] Transaction transaction)
         {
 
+            var items= new List<Item>();
             foreach (var product in transaction.products)
             {
-                var existingProduct = await _productService.GetByIdAsync(1);
-                Console.WriteLine(existingProduct);
+                Product existingProduct = await _productService.GetByIdAsync(1);
+                Console.WriteLine(existingProduct.name);
                 if (existingProduct == null)
                 {
                     return BadRequest(new { message = "Products don't exist" });
                 }
-/*                existingProduct.quantity -= product.quantity;
-*/                /*await _productService.UpdateAsync(existingProduct);*/
+                Console.WriteLine(existingProduct.quantity);
+                Console.WriteLine(product.quantity);
+
+                existingProduct.quantity = existingProduct.quantity - product.quantity;
+                Console.WriteLine("product quanity", existingProduct.quantity);
+                await _productService.UpdateAsync(existingProduct);
+
+
+                items.Add(new Item
+                {
+                    id = product.id,
+                    quantity = product.quantity
+                });
+            
             }
+            transaction.products = items;
             await _transactionService.AddAsync(transaction);
             return CreatedAtAction(nameof(GetById), new { id = transaction.id }, transaction);
         }
