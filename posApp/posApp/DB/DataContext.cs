@@ -7,6 +7,8 @@ namespace posApp.DB
     {
         public DbSet<User> users { get; set; }
         public DbSet<Product> products { get; set; }
+       
+        public DbSet<Transaction> transactions { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {

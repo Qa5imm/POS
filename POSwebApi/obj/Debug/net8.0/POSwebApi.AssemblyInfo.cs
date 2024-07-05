@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("POSwebApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bbfd3aa45c0e5ccdc19806bfd9927a595935db8f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7e4d6971d30f3a636a3f999e53dd60ecf73cc605")]
 [assembly: System.Reflection.AssemblyProductAttribute("POSwebApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("POSwebApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

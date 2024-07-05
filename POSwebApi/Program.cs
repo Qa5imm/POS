@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using posApp.DB;
 using posApp.Services;
+using posApp.Service;
+using posApp.Repository;
 
 
 
@@ -15,8 +17,8 @@ builder.Services.AddDbContext<DataContext>(opt =>
     opt.UseInMemoryDatabase("posApp"));
 
 
-builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -32,7 +34,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+/*app.UseAuthentication();
+*/app.UseAuthorization();
 
 app.MapControllers();
 

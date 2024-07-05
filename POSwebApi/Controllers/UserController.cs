@@ -2,7 +2,7 @@
 using posApp.Models;
 using POSwebApi.Dtos;
 using POSwebApi.DtoConveters;
-using posApp.Services;
+using posApp.Service;
 
 
 
@@ -12,81 +12,97 @@ namespace POSwebApi.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
-        public UserController(UserService userManager)
+        private readonly IService<User> _userService;
+        public UserController(IService<User> userService)
         {
-            _userService = userManager;
+            _userService = userService;
         }
 
-        [HttpGet("all")]
-        public ActionResult<IEnumerable<UserDTO>> GetUsers()
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            List<User> allUsers = _userService.GetUsers();
-            return Ok(UserConverter.ToDTOList(allUsers));
-
+            var users = await _userService.GetAllAsync();
+            List<UserDTO> usersDTO = UserConverter.ToDTOList(users);
+            return Ok(usersDTO);
         }
 
-        [HttpGet("{email}")]
-        public ActionResult<UserDTO> GetUser(string email)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            User? user = _userService.FindUser(email);
+            var user = await _userService.GetByIdAsync(id);
             if (user == null)
             {
-                return NotFound(new { messgae = "User not found" });
+                return NotFound();
             }
-            return Ok(UserConverter.ToDTO(user));
+            UserDTO userDTO = UserConverter.ToDTO(user);
+            return Ok(userDTO);
         }
 
-        [HttpGet("authenticate/{email}")]
-        public ActionResult<bool> Authenticate(string email, string password)
-        {
-            User? user = _userService.AuthenticateUser(email, password);
-            if (user != null)
-            {
-                return Ok(true);
-            }
-            return Ok(false);
-        }
+        /* [HttpGet("authenticate/{email}")]
+         public ActionResult<bool> Authenticate(string email, string password)
+         {
+             User? user = _userService.AuthenticateUser(email, password);
+             if (user != null)
+             {
+                 return Ok(true);
+             }
+             return Ok(false);
+         }*/
 
         [HttpPost]
-        public ActionResult<IEnumerable<UserDTO>> CreateUser(User user)
+        public async Task<IActionResult> Add([FromBody] User user)
         {
-            User? existingUser = _userService.FindUser(user.email);
-
-            if (existingUser != null)
-            {
-                return Conflict(new { message = "User already exist" });
-
-            }
-            _userService.AddUser(user);
+            await _userService.AddAsync(user);
             UserDTO userDTO = UserConverter.ToDTO(user);
-            return CreatedAtAction(nameof(GetUser), new { email = user.email }, userDTO);
+            return CreatedAtAction(nameof(GetById), new { id = user.id }, userDTO);
         }
 
-        [HttpPatch("updateUserRole")]
-        public ActionResult<UserDTO> UpdateUserRole(string email, string role)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] User user)
         {
-            User? existingUser = _userService.FindUser(email);
-            if (existingUser == null)
+            if (id != user.id)
             {
-                return NotFound(new { messgae = "User not found" });
+                return BadRequest();
             }
 
-            User? updatedUser = _userService.UpdateUserRole(email, role);
-            return Ok(UserConverter.ToDTO(updatedUser));
+            var existingUser = await _userService.GetByIdAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            // Update the user
+            await _userService.UpdateAsync(user);
+            UserDTO userDTO = UserConverter.ToDTO(user);
+            return Ok(userDTO);
         }
 
-        [HttpDelete("{email}")]
-        public ActionResult DeleteUser(string email)
-        {
-            User? existingUser = _userService.FindUser(email);
+        /* [HttpPatch("updateUserRole")]
+     public ActionResult<UserDTO> UpdateUserRole(string email, string role)
+     {
+         User? existingUser = _userService.FindUser(email);
+         if (existingUser == null)
+         {
+             return NotFound(new { messgae = "User not found" });
+         }
 
-            if (existingUser == null)
+         User? updatedUser = _userService.UpdateUserRole(email, role);
+         return Ok(UserConverter.ToDTO(updatedUser));
+     }*/
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+
+        {
+
+            var product = await _userService.GetByIdAsync(id);
+            if (product == null)
             {
-                return NotFound(new { message = "User not found" });
+                return NotFound();
             }
-            _userService.DeleteUser(email);
-            return Ok(new { message = "User deleted successfully" });
+
+            await _userService.DeleteAsync(id);
+            return Ok();
         }
 
     }

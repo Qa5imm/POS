@@ -9,6 +9,7 @@ namespace POSwebApi.DtoConveters
         {
             return new ProductDTO
             {
+                id= product.id,
                 name = product.name,
                 price = product.price,
                 quantity = product.quantity,
@@ -26,6 +27,7 @@ namespace POSwebApi.DtoConveters
         {
             return new Product
             {
+                id = productDTO.id,
                 name = productDTO.name,
                 price = productDTO.price,
                 quantity = productDTO.quantity,
